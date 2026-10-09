@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Our Time</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg1:#fbeee9;--bg2:#e8dcf0;--card:rgba(255,255,255,.55);--ink:#4a3a4f;--soft:#8a7590;
+  --ring:rgba(138,117,144,.18);--a:#d98ca3;--b:#a68bd1;--c:#e9b88a;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg1:#1d1626;--bg2:#2f2038;--card:rgba(255,255,255,.06);--ink:#f3e6ee;--soft:#b9a3c2;
+    --ring:rgba(255,255,255,.1);--a:#f0a3bb;--b:#b9a0f0;--c:#f2c79b;
+  }
+}
+:root[data-theme="dark"]{
+  --bg1:#1d1626;--bg2:#2f2038;--card:rgba(255,255,255,.06);--ink:#f3e6ee;--soft:#b9a3c2;
+  --ring:rgba(255,255,255,.1);--a:#f0a3bb;--b:#b9a0f0;--c:#f2c79b;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--ink);
+  font-family:'Jost',system-ui,sans-serif;font-weight:300;display:flex;flex-direction:column;align-items:center;padding:40px 18px}
+h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-style:italic;font-size:2.4rem;margin:0 0 4px;text-align:center}
+.sub{color:var(--soft);letter-spacing:.3em;text-transform:uppercase;font-size:.7rem;margin-bottom:32px;text-align:center}
+.wrap{display:grid;gap:24px;width:100%;max-width:980px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:var(--card);border-radius:28px;padding:30px 22px;text-align:center;backdrop-filter:blur(10px);
+  border:1px solid var(--ring);box-shadow:0 20px 50px rgba(120,80,140,.12)}
+.label{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.5rem;font-weight:500}
+.date{color:var(--soft);font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;margin:4px 0 18px}
+.days{font-family:'Cormorant Garamond',Georgia,serif;font-size:5rem;line-height:1;font-weight:300}
+.days small{display:block;font-family:'Jost',sans-serif;font-size:.7rem;letter-spacing:.35em;text-transform:uppercase;color:var(--soft);margin-top:6px}
+.rings{display:flex;justify-content:center;gap:14px;margin:24px 0 16px}
+.ring{position:relative;width:84px;height:84px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:5;stroke-linecap:round}
+.ring .bg{stroke:var(--ring)}
+.ring .fg{transition:stroke-dashoffset .4s ease}
+.ring .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:1.3rem}
+.ring .num span{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-top:1px}
+.total{color:var(--soft);font-size:.8rem;letter-spacing:.08em}
+</style>
+</head>
+<body>
+<h1>Our Time</h1>
+<div class="sub">every moment counts</div>
+<div class="wrap">
+  <div class="card" data-start="2026-07-27T00:00:00+05:45">
+    <div class="label">First Hello</div>
+    <div class="date">27 July 2026</div>
+    <div class="days"><b class="d">0</b><small>days</small></div>
+    <div class="rings"></div>
+    <div class="total"></div>
+  </div>
+  <div class="card" data-start="2026-08-27T00:00:00+05:45">
+    <div class="label">Officially Us</div>
+    <div class="date">27 August 2026</div>
+    <div class="days"><b class="d">0</b><small>days</small></div>
+    <div class="rings"></div>
+    <div class="total"></div>
+  </div>
+</div>
+<script>
+var R=36,C=2*Math.PI*R;
+var defs=[["hours",24,"--a"],["minutes",60,"--b"],["seconds",60,"--c"]];
+var cards=[].slice.call(document.querySelectorAll(".card")).map(function(el){
+  var box=el.querySelector(".rings");
+  defs.forEach(function(d){
+    var r=document.createElement("div");r.className="ring";
+    r.innerHTML='<svg viewBox="0 0 84 84"><circle class="bg" cx="42" cy="42" r="'+R+'"/><circle class="fg" cx="42" cy="42" r="'+R+'" style="stroke:var('+d[2]+');stroke-dasharray:'+C+';stroke-dashoffset:'+C+'"/></svg><div class="num"><div>0</div><span>'+d[0]+'</span></div>';
+    box.appendChild(r);
+  });
+  return {el:el,start:new Date(el.dataset.start).getTime()};
+});
+function tick(){
+  var now=Date.now();
+  cards.forEach(function(c){
+    var s=Math.max(0,Math.floor((now-c.start)/1000));
+    var vals=[Math.floor(s/86400),Math.floor(s%86400/3600),Math.floor(s%3600/60),s%60];
+    c.el.querySelector(".d").textContent=vals[0].toLocaleString();
+    var rings=c.el.querySelectorAll(".ring");
+    defs.forEach(function(d,i){
+      var v=vals[i+1];
+      rings[i].querySelector(".num div").textContent=String(v).padStart(2,"0");
+      rings[i].querySelector(".fg").style.strokeDashoffset=C*(1-v/d[1]);
+    });
+    c.el.querySelector(".total").textContent=Math.floor(s/60).toLocaleString()+" minutes  |  "+s.toLocaleString()+" seconds";
+  });
+}
+tick();setInterval(tick,1000);
+</script>
+</body>
+</html>
